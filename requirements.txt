@@ -1,0 +1,18 @@
+fastapi
+python-dotenv
+pydantic
+pydantic-settings
+tavily-python
+trafilatura
+sentence_transformers
+numpy
+
+
+# >> # Create a new one
+# >> python -m venv .venv
+# >> 
+# >> # Activate it
+# >> .\.venv\Scripts\Activate.ps1
+# >> 
+# >> # Install packages
+# >> pip install -r requirements.txt

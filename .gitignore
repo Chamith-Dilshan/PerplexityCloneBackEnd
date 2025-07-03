@@ -1,0 +1,19 @@
+# python related
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pdb
+*.egg-info/
+*.eggs/
+*.whl
+*.venv/
+*.env
+*.virtualenv/
+*.tox/
+*.coverage
+.coverage.*
+.tox/
+.mypy_cache/
+.pytest_cache/
+.pytest/
