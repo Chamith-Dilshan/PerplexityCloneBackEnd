@@ -1,6 +1,54 @@
+from httpx import stream
+from config import Settings
+from langchain.prompts import ChatPromptTemplate
+from langchain_ollama import ChatOllama
+from langchain_core.messages import BaseMessage
+from typing import List
+
+settings = Settings()
 
 class LLMService:
     def __init__(self) -> None:
-        self.model = 
-    def generate_response(self, query:str, search_results:list[dict]):
-        pass
+        self.llm = ChatOllama(
+            model=settings.MODEL_NAME,
+            temperature=0.6,
+        )
+        #self.output_parser = StrOutputParser()
+
+    def _format_context(self, search_results: List[dict]) -> str:
+        return "\n\n".join(
+            [f"Source {i+1}: ({r['url']}):\n{r['content']}" for i, r in enumerate(search_results)]
+        )
+
+    def _create_chain(self):
+        prompt = ChatPromptTemplate.from_template(
+            """Context from web search:
+            {context}
+
+            Query: {query}
+
+            Please provide a comprehensive, detailed, well-cited accurate response using ONLY the above context. 
+            Include references (e.g., Source 1) as appropriate. Avoid using your own knowledge unless strictly necessary."""
+        )
+        return (
+            # {"context": lambda x: x["context"], "query": lambda x: x["query"]}
+            prompt
+            | self.llm
+            #| self.output_parser
+        )
+
+    def generate_response(self, query: str, search_results: List[dict]):
+        context_text = self._format_context(search_results)
+        chain = self._create_chain()
+
+        print("LLM response stream started...")
+
+        for chunk in chain.stream({"query": query, "context": context_text}):
+            # when using ChatOllama, chunk is usually a ChatMessage
+
+            if isinstance(chunk, BaseMessage):
+                yield chunk.content  # For LangChain 0.1.14+ style ChatMessage chunks
+            elif hasattr(chunk, "text"):
+                yield chunk.text     # For generic string-based chunks
+            else:
+                yield str(chunk)

@@ -6,7 +6,12 @@ tavily-python
 trafilatura
 sentence_transformers
 numpy
-
+ollama
+fastapi[standard]
+langchain
+langchain-core
+langchain-ollama
+langchain-community
 
 # >> # Create a new one
 # >> python -m venv .venv
