@@ -34,7 +34,7 @@ async def websocket_chat_endpoint(websocket:WebSocket):
             "data": sorted_result
         })
         # generate the response using LLM model
-        for chunk in llm_service.generate_response(query, sorted_result):
+        for chunk in llm_service.generate_response_stream(query, sorted_result):
             await asyncio.sleep(0.1)
             await websocket.send_json({
                 "type": "content",
