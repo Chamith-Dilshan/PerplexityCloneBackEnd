@@ -37,7 +37,6 @@ class LLMService:
             # {"context": lambda x: x["context"], "query": lambda x: x["query"]}
             prompt
             | self.llm
-            #| self.output_parser
         )
 
     def generate_response_stream(self, query: str, search_results: List[dict]):
@@ -48,15 +47,20 @@ class LLMService:
 
         for chunk in chain.stream({"query": query, "context": context_text}):
             # when using ChatOllama, chunk is usually a ChatMessage
+            print("LLM response chunk received:", chunk)
 
             if isinstance(chunk, BaseMessage):
+                print("Chunk is a BaseMessage instance.")
                 yield chunk.content  # For LangChain 0.1.14+ style ChatMessage chunks
             elif hasattr(chunk, "text"):
+                print("Chunk has a 'text' attribute.")
                 yield chunk.text     # For generic string-based chunks
             else:
+                print("Chunk is a string or has no specific attributes.")
                 yield str(chunk)
 
-    # 
+    # non-streaming version of the chain
+    # this is used to get the response from the LLM model in one go
     def _create_chain(self):
         prompt = ChatPromptTemplate.from_template(
             """Context from web search:

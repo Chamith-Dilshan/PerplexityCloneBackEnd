@@ -19,20 +19,24 @@ async def websocket_chat_endpoint(websocket:WebSocket):
     try:
         await asyncio.sleep(0.1)
         data = await websocket.receive_json()
+        print("Received data:", data)
         query = data.get("query", "")
         if not query:
             await websocket.send_text("Query cannot be empty.")
             return
         # Search the web for relavant sources
         search_results = search_service.web_search(query)
+        print("Search results:", search_results)
         # Sort out the sources
         sorted_result = sort_source_service.sort_service(query, search_results)
+        print("Sorted results:", sorted_result)
         # send sorted web results 
         await asyncio.sleep(0.1)
         await websocket.send_json({
             "type": "search_results",
             "data": sorted_result
         })
+        print("Sorted results sent to client.")
         # generate the response using LLM model
         for chunk in llm_service.generate_response_stream(query, sorted_result):
             await asyncio.sleep(0.1)
@@ -40,6 +44,7 @@ async def websocket_chat_endpoint(websocket:WebSocket):
                 "type": "content",
                 "data":chunk
             })
+        print("Response sent to client.")
     except Exception as e:
         print("An error occurred while processing the websocket connection. Error:", str(e))
     finally:
